@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "protobase"
+version = "0.1.0"
+description = "Protobase is a foundational Python library for class creation, enhancing efficiency and reliability, automatic protocol implementation akin to Rust's Traits, and features for immutable object creation."
+authors = ["jdavidls <jdavidls@protonmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.scripts]
+test = "scripts:run_test"
+dev = "scripts:run_dev"
+
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[tool.poetry.group.dev.dependencies]
+watchdog = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
