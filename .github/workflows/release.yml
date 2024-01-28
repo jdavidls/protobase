@@ -3,11 +3,11 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "v*"  
+    # tags:
+    #   - "v*"  
 jobs:
   dist:
-    name: Run tests
+    name: Build distribution
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,7 +15,8 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
 
-      - uses: actions/setup-python@v5
+      - name: Set up python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'poetry'
@@ -26,7 +27,7 @@ jobs:
       - name: Running tests
         run: poetry run test
 
-      - name: Running tests
+      - name: Building dist
         run: poetry build
 
       - name: Upload dist
