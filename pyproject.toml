@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "protobase"
-version = "0.1.1"
+version = "0.0.0"
 description = "Protobase is a foundational Python library for class creation, enhancing efficiency and reliability, automatic protocol implementation akin to Rust's Traits, and features for immutable object creation."
 authors = ["jdavidls <jdavidls@protonmail.com>"]
 license = "MIT"
