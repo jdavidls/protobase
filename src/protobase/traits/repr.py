@@ -33,14 +33,14 @@ class Repr(Trait):
 
 @impl(Repr.__repr__)
 def _repr_impl(cls: type[Repr]):
-    fields = fields_of(cls).keys()
+    fields = fields_of(cls)
 
     fields_fmt = (f"{field}={{getattr(self, '{field}')}}" for field in fields)
     fstr = f"{cls.__qualname__}({', '.join(fields_fmt)})"
 
     return compile_function(
         "__repr__",
-        f"def __repr__(self):",
+        "def __repr__(self):",
         f"    return f{repr(fstr)}",
     )
 

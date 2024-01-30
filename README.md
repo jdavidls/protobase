@@ -1,7 +1,10 @@
 # Protobase
 
-Protobase is a comprehensive Python library designed to serve as a foundational element in class creation, similar to dataclasses and the attrs library. It aims to streamline and optimize the development process by introducing efficient, reliable, and user-friendly structures.
+```
+[![Documentation Status](https://readthedocs.org/projects/protobase/badge/?version=latest)](https://protobase.readthedocs.io/en/latest/?badge=latest)
+```
 
+Protobase is a comprehensive Python library designed to serve as a foundational element in class creation, similar to dataclasses and the attrs library. It aims to streamline and optimize the development process by introducing efficient, reliable, and user-friendly structures.
 
 - traits (defered auto impl methods)
 - immutability

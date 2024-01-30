@@ -26,7 +26,7 @@ class Init(Trait):
 
 @impl(Init.__init__)
 def _init_impl(cls: type[Base]):
-    fields = fields_of(cls).keys()
+    fields = fields_of(cls)
 
     return compile_function(
         "__init__",

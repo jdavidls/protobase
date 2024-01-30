@@ -31,6 +31,15 @@ class Watcher(FileSystemEventHandler):
         run_test()
 
 
+def run_doc():
+    """
+    Runs the unit tests using the `unittest` module.
+    """
+    os.system("clear && printf '\\e[3J'")
+    # subprocess.call("sphinx-apidoc -o docs/source src/protobase".split())
+    subprocess.call("sphinx-build docs dist/docs".split())
+
+
 def run_test():
     """
     Runs the unit tests using the `unittest` module.

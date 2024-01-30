@@ -3,7 +3,6 @@ from .dynamic_attrs import *
 from .init import *
 from .repr import *
 from .hash import *
-from .eq import *
 from .cmp import *
 from .inmutable import *
 from .consed import *

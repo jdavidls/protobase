@@ -58,10 +58,10 @@ def compile_function(
 
     Args:
         name (str): The name of the function.
-        *source: The source code of the function.
+        source: The source code of the function.
         locals (dict[str, Any] | None, optional): Local variables to be used during execution. Defaults to None.
         globals (dict[str, Any] | None, optional): Global variables to be used during execution. Defaults to None.
-        **kwargs: Additional keyword arguments to be set as attributes of the compiled function.
+        kwargs: Additional keyword arguments to be set as attributes of the compiled function.
 
     Returns:
         Callable: The compiled function.
@@ -75,6 +75,7 @@ def compile_function(
         3
         >>> fn.__source__
         'def foo(x: int, y: int) -> int:\n    return x + y\n    \n    \n'
+
     """
     if locals is None:
         locals = {}

@@ -10,6 +10,7 @@ readme = "README.md"
 [tool.poetry.scripts]
 test = "scripts:run_test"
 dev = "scripts:run_dev"
+doc = "scripts:run_doc"
 
 
 [tool.poetry.dependencies]
@@ -18,6 +19,11 @@ python = "^3.12"
 
 [tool.poetry.group.dev.dependencies]
 watchdog = "^3.0.0"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "6.2.1"
+renku-sphinx-theme = "^0.4.0"
 
 [build-system]
 requires = ["poetry-core"]

@@ -3,7 +3,8 @@ import unittest
 import pickle
 
 from protobase.core import Base
-from protobase.trait import Eq, Hash, Repr, Init, Consed
+from protobase.traits import Eq, Hash, Repr, Init, Consed
+from protobase.utils import slots_of
 
 
 class Simple(Base, Eq, Hash, Repr, Init):
@@ -11,13 +12,13 @@ class Simple(Base, Eq, Hash, Repr, Init):
     y: int = 2
 
 
+class Sub(Simple):
+    a: int = 99
+
+
 class Cons(Base, Consed, Repr):
     x: int
     y: int
-
-
-class Sub(Simple):
-    a: int = 99
 
 
 def pick[T](obj: T) -> T:

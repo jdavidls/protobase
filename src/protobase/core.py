@@ -12,6 +12,7 @@ from typing import (
     Any,
     Callable,
     Generic,
+    NamedTuple,
     dataclass_transform,
     get_type_hints,
 )
@@ -73,17 +74,21 @@ class Meta(type):
 
         return type.__new__(mcs, name, tuple(bases), namespace)
 
-    def __call__(cls, *args, **kwargs):
-        return cls.__new__(cls, *args, **kwargs)
+    # def __call__(cls, *args, **kwargs):
+    #     return cls.__new__(cls, *args, **kwargs)
 
 
 @dataclass_transform()
-class Trait(metaclass=Meta):
+class Trait(metaclass=Meta):  # TODO: Quitar trait de la metaclase
     """
     Base class for all traits.
     Traits are classes whose instances are meant to be used as
     mixins for other classes.
     """
+
+    @classmethod
+    def __check_type_hints__(cls):
+        pass
 
     def __new__(cls, *args, **kwargs):
         if not issubclass(cls, Base):
@@ -92,15 +97,6 @@ class Trait(metaclass=Meta):
         obj = object.__new__(cls)
         obj.__init__(*args, **kwargs)
         return obj
-
-    def __getnewargs_ex__(self):
-        return (), {nm: getattr(self, nm) for nm in fields_of(self)}
-
-    def __getstate__(self):
-        pass
-
-    def __setstate__(self, state):
-        pass
 
 
 @dataclass_transform()
@@ -112,11 +108,14 @@ class Base(Trait, metaclass=Meta):
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
 
-        # Copy proto method descriptors from base traits
+        # Pop front on the mro  the class descriptors for slots, protomethods
         for base in cls.__bases__:
-            if base is object:
-                # if issubclass(base, Base) or base is object:
+            if not issubclass(base, Trait):
                 continue
+
+            # for nm in base.__slots__:
+            #     if not nm in cls.__dict__:
+            #         setattr(cls, nm, base.__dict__[nm])
 
             for nm, item in base.__dict__.items():
                 if nm in cls.__dict__:
@@ -129,17 +128,33 @@ class Base(Trait, metaclass=Meta):
                     setattr(cls, nm, item)
 
 
-def fields_of(cls_or_obj: Meta | Base) -> MappingProxyType[str, Any]:
+def is_trait(cls: type[Base]) -> bool:
+    return issubclass(cls, Trait) and not issubclass(cls, Base)
+
+
+class AttrInfo(NamedTuple):
+    name: str
+    type: type
+    default: Any
+    annotations: dict[str, Any]
+
+
+def fields_of(cls: type[Base]) -> MappingProxyType[str, Any]:
     """
     Get the fields of a protobase class or object.
+
     """
-    if not hasattr(cls_or_obj, "__attr_cache__"):
-        cls_or_obj.__attr_cache__ = get_type_hints(cls_or_obj)
+    assert issubclass(cls, Base)
+
+    if "__attr_cache__" not in cls.__dict__:
+        hints = get_type_hints(cls)
+        cls.__attr_cache__ = hints
+        cls.__check_type_hints__()
 
     return MappingProxyType(
         {
             nm: tp
-            for nm, tp in cls_or_obj.__attr_cache__.items()
+            for nm, tp in cls.__dict__["__attr_cache__"].items()
             if not nm.startswith("_")
         }
     )
@@ -189,15 +204,15 @@ class protomethod[**Args, RType]:
         return self
 
     def __set_name__(self, owner, name):
+        if not is_trait(owner):
+            raise TypeError(
+                f"Cannot define a protobase method '{name}' in a non-trait only class '{owner.__qualname__}'"
+            )
         if self._proto_fn.__name__ != name:
             raise NameError(
                 f"Cannot define a protobase method '{name}' with a different name than '{self._proto_fn.__name__}'"
             )
-        if not issubclass(owner, Trait) or issubclass(owner, Base):
-            raise TypeError(
-                f"Cannot define a protobase method '{name}' in a non-trait only class '{owner.__qualname__}'"
-            )
-        self._owner = owner
+        # self._owner = owner
 
     def __get__(self, obj, objtype=None):
         if obj is None:
@@ -225,3 +240,11 @@ def impl(target: protomethod):
         return impl_fn
 
     return impl_decorator
+
+
+@dataclass_transform()
+def protobase():
+    def protobase_decorator(cls):
+        return cls
+
+    return protobase_decorator
