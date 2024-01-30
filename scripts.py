@@ -28,10 +28,10 @@ class Watcher(FileSystemEventHandler):
             case _:
                 return
 
-        run_test()
+        run_tests()
 
 
-def run_doc():
+def build_docs():
     """
     Runs the unit tests using the `unittest` module.
     """
@@ -40,7 +40,7 @@ def run_doc():
     subprocess.call("sphinx-build docs dist/docs".split())
 
 
-def run_test():
+def run_tests():
     """
     Runs the unit tests using the `unittest` module.
     """
@@ -60,7 +60,7 @@ def run_dev():
     observer.start()
 
     try:
-        run_test()
+        run_tests()
         while True:
             time.sleep(1)
     except KeyboardInterrupt:

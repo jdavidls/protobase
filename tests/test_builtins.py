@@ -28,6 +28,21 @@ class InitTest(unittest.TestCase):
         self.assertEqual(c1.c, c2.c)
 
 
+class ReprTest(unittest.TestCase):
+    class ABC(Base, traits.Repr, traits.Init):
+        a: int = 1
+        b: float = 2.0
+        c: str = "3"
+
+    def test_repr_default(self):
+        a = self.ABC()
+        self.assertEqual(repr(a), "ReprTest.ABC()")
+
+    def test_repr(self):
+        a = self.ABC(a=2, b=3.0, c="4")
+        self.assertEqual(repr(a), "ReprTest.ABC(a=2, b=3.0, c='4')")
+
+
 class CmpTest(unittest.TestCase):
     class ABC(Base, traits.Repr, traits.Cmp, traits.Eq, traits.Init):
         a: int = 1
@@ -97,7 +112,7 @@ class HashTest(unittest.TestCase):
 
     def test_hash(self):
         a = self.ABC(a=1, b=2.0, c="3")
-        b = self.ABC(a=1, b=2.0, c="3")
+        b = self.ABC()
 
         d = {}
         d[a] = 9
@@ -129,3 +144,45 @@ class InmutableTest(unittest.TestCase):
             a.a = 2
         with self.assertRaises(AttributeError):
             a.b = frozenset({3.0})
+
+
+class ConsedTest(unittest.TestCase):
+    class Foo(Base, traits.Consed):
+        a: int
+        b: float
+        c: str
+
+    def test_consed(self):
+        a = self.Foo(a=1, b=2.0, c="3")
+        b = self.Foo(a=1, b=2.0, c="3")
+
+        self.assertIs(a, b)
+
+        c = self.Foo(a=1, b=2.0, c="4")
+        self.assertIsNot(a, c)
+
+
+class ZipTest(unittest.TestCase):
+    class Foo(Base, traits.Zip, traits.Init):
+        a: int
+        b: float
+        c: str
+
+    def test_zip(self):
+        a = self.Foo(a=1, b=2.0, c="3")
+        b = self.Foo(a=9, b=8.0, c="7")
+
+        self.assertEqual(
+            list(a.zip(b)),
+            [
+                ("a", (1, 9)),
+                ("b", (2.0, 8.0)),
+                ("c", ("3", "7")),
+            ],
+        )
+
+    def test_zip_raise(self):
+        a = self.Foo(a=1, b=2.0, c="3")
+
+        with self.assertRaises(TypeError):
+            list(a.zip(1))

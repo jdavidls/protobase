@@ -6,25 +6,29 @@ authors = ["jdavidls <jdavidls@protonmail.com>"]
 license = "MIT"
 readme = "README.md"
 
-
-[tool.poetry.scripts]
-test = "scripts:run_test"
-dev = "scripts:run_dev"
-doc = "scripts:run_doc"
-
-
 [tool.poetry.dependencies]
 python = "^3.12"
 
-
 [tool.poetry.group.dev.dependencies]
 watchdog = "^3.0.0"
-
+poethepoet = "^0.24.4"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "6.2.1"
 renku-sphinx-theme = "^0.4.0"
 
+[tool.poe.tasks.dev]
+help = "Run development environment (watch-mode testing)"
+script = "scripts:run_dev"
+
+[tool.poe.tasks.test]
+help = "Run tests"
+script = "scripts:run_tests"
+
+[tool.poe.tasks.build-docs]
+help = "Build documentation"
+script = "scripts:build_docs"
+
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core", "poethepoet>=0.24.4,<0.25.0"]
 build-backend = "poetry.core.masonry.api"

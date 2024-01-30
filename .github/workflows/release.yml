@@ -23,10 +23,10 @@ jobs:
 
       - name: Intall dependencies
         run: poetry install
-
+  
       - name: Running tests
         run: poetry run test
-
+          
       - name: Building dist
         run: |
           poetry version $(git describe --tags --abbrev=0)

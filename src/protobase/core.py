@@ -35,6 +35,8 @@ class Meta(type):
     to allow Consign objects to be pickleable.
     """
 
+    # __kwargs__: dict[str, Any] ## implementamos como un ChainMap según el mro?
+
     __kwdefaults__: dict[str, Any]
     __attr_cache__: MappingProxyType(dict[str, Any])
 
@@ -92,11 +94,11 @@ class Trait(metaclass=Meta):  # TODO: Quitar trait de la metaclase
 
     def __new__(cls, *args, **kwargs):
         if not issubclass(cls, Base):
-            raise TypeError(f"Cannot instantiate trait '{cls.__qualname__}'")
+            raise TypeError(
+                f"Cannot instantiate a bare trait class '{cls.__qualname__}'"
+            )
 
-        obj = object.__new__(cls)
-        obj.__init__(*args, **kwargs)
-        return obj
+        return object.__new__(cls)
 
 
 @dataclass_transform()

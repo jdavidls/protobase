@@ -11,47 +11,53 @@ class Repr(Trait):
         >>> class Foo(Base, Repr):
         ...     a: int
         ...     b: int
-        >>> foo = Foo(1, 2)
+        >>> foo = Foo(a=1, b=2)
         >>> foo
         Foo(a=1, b=2)
     """
 
     @protomethod()
-    def __repr__(self) -> str:
-        ...
-
-    @protomethod()
     def __rich_repr__(self) -> Iterator[tuple]:
         ...
 
-    # for field in type(self):
-    #     if field.has_default:
-    #         yield field.name, getattr(self, field.name), field.default
-    #     else:
-    #         yield field.name, getattr(self, field.name)
+    @protomethod()
+    def __repr__(self) -> str:
+        ...
 
 
 @impl(Repr.__repr__)
-def _repr_impl(cls: type[Repr]):
+def _impl_repr(cls: type[Repr]):
+    def __repr__(self):
+        attrs = filter(_rich_attr_filter, self.__rich_repr__())
+        attrs = map(_rich_attr_map, attrs)
+        return f"{cls.__qualname__}({", ".join(attrs)})"
+
+    return __repr__
+
+
+@impl(Repr.__rich_repr__)
+def _impl_rich_repr(cls: type[Repr]):
     fields = fields_of(cls)
+    defaults = cls.__kwdefaults__
 
-    fields_fmt = (f"{field}={{getattr(self, '{field}')}}" for field in fields)
-    fstr = f"{cls.__qualname__}({', '.join(fields_fmt)})"
+    def __rich_repr__(self):
+        for field in fields:
+            if field in defaults:
+                yield field, getattr(self, field), defaults[field]
+            else:
+                yield field, getattr(self, field)
 
-    return compile_function(
-        "__repr__",
-        "def __repr__(self):",
-        f"    return f{repr(fstr)}",
-    )
+    return __rich_repr__
 
 
-# if HAS_RICH:
-# @Repr.__repr__.impl()
-# def _impl_rich_repr(cls: type[Repr]):
-#     fields = attrs(cls).keys()
+def _rich_attr_filter(attr_info: tuple) -> bool:
+    if len(attr_info) == 3 and attr_info[1] == attr_info[2]:
+        return False
+    return True
 
-#     return compile_function(
-#         "__rich_repr__",
-#         f"def __rich_repr__(self):",
-#         f'    return f"{type(self).__qualname__}({", ".join(f"{field.name}={{getattr(self, field.name)!r}}" for field in fields)})"',
-#     )
+
+def _rich_attr_map(attr_info: tuple) -> str:
+    if len(attr_info) == 1:
+        return repr(attr_info[0])
+
+    return f"{attr_info[0]}={attr_info[1]!r}"

@@ -94,6 +94,10 @@ class Inmutable(Init, Trait):
         AttributeError: Cannot set attribute a. Foo is readonly.
     """
 
+    def __init_subclass__(cls) -> None:
+        return super().__init_subclass__()
+        cls.__dict__["__setattr__"] = Inmutable.__setattr__
+
     @classmethod
     def __check_type_hints__(cls):
         super().__check_type_hints__()

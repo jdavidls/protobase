@@ -1,3 +1,4 @@
+from typing import Any
 from protobase.core import Trait, Base, fields_of, impl, protomethod
 from protobase.utils import compile_function, attr_lookup
 
@@ -23,9 +24,16 @@ class Init(Trait):
     def __init__(self, **kwargs):
         ...
 
+    @protomethod()
+    def __getstate__(self) -> dict[str, Any]:
+        ...
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        self.__init__(**state)
+
 
 @impl(Init.__init__)
-def _init_impl(cls: type[Base]):
+def _impl_setstate(cls: type[Base]):
     fields = fields_of(cls)
 
     return compile_function(
@@ -38,4 +46,17 @@ def _init_impl(cls: type[Base]):
         },
         __kwdefaults__=cls.__kwdefaults__,
         # __defaults__=cls.__defaults__,
+    )
+
+
+@impl(Init.__getstate__)
+def _impl_getstate(cls: type[Base]):
+    fields = fields_of(cls)
+
+    params = ", ".join(f"{field}=self.{field}" for field in fields)
+
+    return compile_function(
+        "__getstate__",
+        "def __getstate__(self):",
+        f"    return dict({params})",
     )
