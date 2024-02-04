@@ -1,5 +1,5 @@
 from typing import Any
-from protobase.core import Trait, Base, fields_of, impl, protomethod
+from protobase.core import Trait, Obj, fields_of, impl, protomethod
 from protobase.utils import compile_function, attr_lookup
 
 
@@ -21,19 +21,17 @@ class Init(Trait):
     """
 
     @protomethod()
-    def __init__(self, **kwargs):
-        ...
+    def __init__(self, **kwargs): ...
 
     @protomethod()
-    def __getstate__(self) -> dict[str, Any]:
-        ...
+    def __getstate__(self) -> dict[str, Any]: ...
 
     def __setstate__(self, state: dict[str, Any]) -> None:
         self.__init__(**state)
 
 
 @impl(Init.__init__)
-def _impl_setstate(cls: type[Base]):
+def _impl_setstate(cls: type[Obj]):
     fields = fields_of(cls)
 
     return compile_function(
@@ -50,7 +48,7 @@ def _impl_setstate(cls: type[Base]):
 
 
 @impl(Init.__getstate__)
-def _impl_getstate(cls: type[Base]):
+def _impl_getstate(cls: type[Obj]):
     fields = fields_of(cls)
 
     params = ", ".join(f"{field}=self.{field}" for field in fields)

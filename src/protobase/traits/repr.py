@@ -1,6 +1,5 @@
 from typing import Iterator
 from protobase.core import Trait, fields_of, impl, protomethod
-from protobase.utils import compile_function
 
 
 class Repr(Trait):
@@ -17,12 +16,10 @@ class Repr(Trait):
     """
 
     @protomethod()
-    def __rich_repr__(self) -> Iterator[tuple]:
-        ...
+    def __rich_repr__(self) -> Iterator[tuple]: ...
 
     @protomethod()
-    def __repr__(self) -> str:
-        ...
+    def __repr__(self) -> str: ...
 
 
 @impl(Repr.__repr__)
@@ -30,7 +27,7 @@ def _impl_repr(cls: type[Repr]):
     def __repr__(self):
         attrs = filter(_rich_attr_filter, self.__rich_repr__())
         attrs = map(_rich_attr_map, attrs)
-        return f"{cls.__qualname__}({", ".join(attrs)})"
+        return f"{cls.__qualname__}({', '.join(attrs)})"
 
     return __repr__
 

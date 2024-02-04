@@ -1,6 +1,6 @@
 from weakref import WeakKeyDictionary, ref
 
-from protobase.core import Base, Trait, fields_of
+from protobase.core import Obj, Trait, fields_of
 
 from .cmp import Eq
 from .hash import Hash
@@ -31,7 +31,7 @@ class Consed(Eq, Hash, Inmutable, Init, Weak, Trait):
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
-        if issubclass(cls, Base):
+        if issubclass(cls, Obj):
             cls.__consing__ = WeakKeyDictionary()
 
     def __new__(cls, *args, **kwargs):

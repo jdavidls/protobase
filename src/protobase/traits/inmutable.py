@@ -144,5 +144,5 @@ class Inmutable(Init, Trait):
 
     def __setattr__(self, nm, val) -> NoReturn:
         raise AttributeError(
-            f"Cannot set attribute '{nm}'. {type(self).__qualname__} is readonly."
+            f"Cannot set attribute '{nm}'. {type(self).__qualname__} is inmutable."
         )

@@ -1,0 +1,21 @@
+%import common.CNAME -> ID
+%import common.NUMBER -> NAT
+%import common.WS
+%ignore WS
+
+?expr: addition{product{unary{term{expr}}}}
+
+?term{next}: "(" next ")" -> parens
+    | ID -> id
+    | NAT -> nat
+
+?unary{next}: next
+    | "-" unary{next} -> neg
+
+?addition{next}: next
+    | addition{next} "+" next -> add
+    | addition{next} "-" next -> sub
+
+?product{next}: next
+    | product{next} "*" next -> mul
+    | product{next} "/" next -> div

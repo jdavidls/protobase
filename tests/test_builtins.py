@@ -1,11 +1,11 @@
 # %%
 import unittest
 
-from protobase import Base, traits
+from protobase import Obj, traits
 
 
 class InitTest(unittest.TestCase):
-    class A(Base, traits.Init):
+    class A(Obj, traits.Init):
         a: int = 1
 
     class B(A):
@@ -29,7 +29,7 @@ class InitTest(unittest.TestCase):
 
 
 class ReprTest(unittest.TestCase):
-    class ABC(Base, traits.Repr, traits.Init):
+    class ABC(Obj, traits.Repr, traits.Init):
         a: int = 1
         b: float = 2.0
         c: str = "3"
@@ -44,7 +44,7 @@ class ReprTest(unittest.TestCase):
 
 
 class CmpTest(unittest.TestCase):
-    class ABC(Base, traits.Repr, traits.Cmp, traits.Eq, traits.Init):
+    class ABC(Obj, traits.Repr, traits.Cmp, traits.Eq, traits.Init):
         a: int = 1
         b: float = 2.0
         c: str = "3"
@@ -105,7 +105,7 @@ class CmpTest(unittest.TestCase):
 
 
 class HashTest(unittest.TestCase):
-    class ABC(Base, traits.Hash, traits.Eq, traits.Init):
+    class ABC(Obj, traits.Hash, traits.Eq, traits.Init):
         a: int = 1
         b: float = 2.0
         c: str = "3"
@@ -120,18 +120,18 @@ class HashTest(unittest.TestCase):
 
 
 class InmutableTest(unittest.TestCase):
-    class ABC(Base, traits.Inmutable):
+    class ABC(Obj, traits.Inmutable):
         a: int = 1
         b: tuple[frozenset] = frozenset({2.0})
 
     def test_invalid_inmutable(self):
-        class InvalidInmutable(Base, traits.Inmutable):
+        class InvalidInmutable(Obj, traits.Inmutable):
             dct: dict
 
         with self.assertRaises(TypeError):
             InvalidInmutable(dct={})
 
-        class InvalidInmutableNested(Base, traits.Inmutable):
+        class InvalidInmutableNested(Obj, traits.Inmutable):
             dct: tuple[dict]
 
         with self.assertRaises(TypeError):
@@ -147,7 +147,7 @@ class InmutableTest(unittest.TestCase):
 
 
 class ConsedTest(unittest.TestCase):
-    class Foo(Base, traits.Consed):
+    class Foo(Obj, traits.Consed):
         a: int
         b: float
         c: str
@@ -163,7 +163,7 @@ class ConsedTest(unittest.TestCase):
 
 
 class ZipTest(unittest.TestCase):
-    class Foo(Base, traits.Zip, traits.Init):
+    class Foo(Obj, traits.Zip, traits.Init):
         a: int
         b: float
         c: str

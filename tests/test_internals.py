@@ -1,10 +1,10 @@
 import unittest
 
-from protobase import Base
+from protobase import Obj, traits
 
 
 class MroDescriptorTest(unittest.TestCase):
-    class A(Base):
+    class A(Obj):
         a: int = 1
 
     class B(A):

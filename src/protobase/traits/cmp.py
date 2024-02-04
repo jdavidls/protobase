@@ -11,10 +11,10 @@ class Eq(Trait):
 
     Example:
 
-        >>> from protobase.core import Base
+        >>> from protobase.core import Obj
         >>> from protobase.trait import Eq
         >>>
-        >>> class Point(Base, Eq):
+        >>> class Point(Obj, Eq):
         ...     x: int
         ...     y: int
         ...
@@ -32,12 +32,10 @@ class Eq(Trait):
     """
 
     @protomethod()
-    def __eq__(self, other: Self) -> bool:
-        ...
+    def __eq__(self, other: Self) -> bool: ...
 
     @protomethod()
-    def __ne__(self, other: Self) -> bool:
-        ...
+    def __ne__(self, other: Self) -> bool: ...
 
 
 @impl(Eq.__eq__)
@@ -68,12 +66,10 @@ def _impl_ne(cls: type[Eq]):
 
 class Cmp(Eq):
     @protomethod()
-    def __lt__(self, other: Self) -> NotImplementedType | bool:
-        ...
+    def __lt__(self, other: Self) -> NotImplementedType | bool: ...
 
     @protomethod()
-    def __gt__(self, other: Self) -> NotImplementedType | bool:
-        ...
+    def __gt__(self, other: Self) -> NotImplementedType | bool: ...
 
     def __le__(self, other: Self) -> NotImplementedType | bool:
         res = self.__gt__(other)

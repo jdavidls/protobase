@@ -1,4 +1,4 @@
-from protobase.core import Base, Trait, fields_of, impl, protomethod
+from protobase.core import Obj, Trait, fields_of, impl, protomethod
 from protobase.utils import attr_lookup, compile_function, slots_of
 
 
@@ -22,12 +22,11 @@ class Hash(Trait):
     """
 
     @protomethod()
-    def __hash__(self):
-        ...
+    def __hash__(self): ...
 
 
 @impl(Hash.__hash__)
-def _hash_impl(cls: type[Base]):
+def _hash_impl(cls: type[Obj]):
     fields = fields_of(cls)
 
     if "__hash_cache__" in slots_of(cls):

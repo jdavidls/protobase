@@ -1,18 +1,22 @@
 # %%
 from __future__ import annotations
+from typing import TypeVar
 import unittest
 import pickle
 
-from protobase import Base, traits
+from protobase import Obj, traits
 from protobase.traits.consed import consed_count
 
 
-def clone[T](obj: T) -> T:
+T = TypeVar("T")
+
+
+def clone(obj: T) -> T:
     return pickle.loads(pickle.dumps(obj))
 
 
 class PickleTest(unittest.TestCase):
-    class Root(Base, traits.Cmp, traits.Repr, traits.Init):
+    class Root(Obj, traits.Cmp, traits.Repr, traits.Init):
         alphas: list[PickleTest.Alpha]
         betas: list[PickleTest.Beta]
 
@@ -25,7 +29,7 @@ class PickleTest(unittest.TestCase):
                 betas=betas,
             )
 
-    class Alpha(Base, traits.Cmp, traits.Repr, traits.Consed):
+    class Alpha(Obj, traits.Cmp, traits.Repr, traits.Consed):
         a: int
         b: int
 
@@ -36,7 +40,7 @@ class PickleTest(unittest.TestCase):
                 b=10 - n,
             )
 
-    class Beta(Base, traits.Cmp, traits.Repr, traits.Init):
+    class Beta(Obj, traits.Cmp, traits.Repr, traits.Init):
         n: int
         alpha: PickleTest.Alpha
 

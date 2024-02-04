@@ -13,6 +13,8 @@ from typing import (
     Callable,
     Generic,
     NamedTuple,
+    ParamSpec,
+    TypeVar,
     dataclass_transform,
     get_type_hints,
 )
@@ -93,7 +95,7 @@ class Trait(metaclass=Meta):  # TODO: Quitar trait de la metaclase
         pass
 
     def __new__(cls, *args, **kwargs):
-        if not issubclass(cls, Base):
+        if not issubclass(cls, Obj):
             raise TypeError(
                 f"Cannot instantiate a bare trait class '{cls.__qualname__}'"
             )
@@ -102,7 +104,7 @@ class Trait(metaclass=Meta):  # TODO: Quitar trait de la metaclase
 
 
 @dataclass_transform()
-class Base(Trait, metaclass=Meta):
+class Obj(Trait, metaclass=Meta):
     """
     Base class for all protobase classes.
     """
@@ -130,8 +132,8 @@ class Base(Trait, metaclass=Meta):
                     setattr(cls, nm, item)
 
 
-def is_trait(cls: type[Base]) -> bool:
-    return issubclass(cls, Trait) and not issubclass(cls, Base)
+def is_trait(cls: type[Obj]) -> bool:
+    return issubclass(cls, Trait) and not issubclass(cls, Obj)
 
 
 class AttrInfo(NamedTuple):
@@ -141,12 +143,12 @@ class AttrInfo(NamedTuple):
     annotations: dict[str, Any]
 
 
-def fields_of(cls: type[Base]) -> MappingProxyType[str, Any]:
+def fields_of(cls: type[Obj]) -> MappingProxyType[str, Any]:
     """
     Get the fields of a protobase class or object.
 
     """
-    assert issubclass(cls, Base)
+    assert issubclass(cls, Obj)
 
     if "__attr_cache__" not in cls.__dict__:
         hints = get_type_hints(cls)
@@ -162,7 +164,11 @@ def fields_of(cls: type[Base]) -> MappingProxyType[str, Any]:
     )
 
 
-class protomethod[**Args, RType]:
+Args = ParamSpec("Args")
+RType = TypeVar("RType")
+
+
+class protomethod(Generic[Args, RType]):
     """
 
     Example:
@@ -195,7 +201,7 @@ class protomethod[**Args, RType]:
     )
     _proto_fn: Callable
     _impl_fn: Callable
-    _owner: type[Base]
+    _owner: type[Obj]
 
     def __init__(self, proto_fn: Callable[Args, RType] = None) -> None:
         if proto_fn is not None:
@@ -220,7 +226,7 @@ class protomethod[**Args, RType]:
         if obj is None:
             return self
 
-        assert issubclass(objtype, Base)
+        assert issubclass(objtype, Obj)
 
         fn = self._impl_fn(objtype)
         fn.__name__ = self._proto_fn.__name__
