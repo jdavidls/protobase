@@ -22,10 +22,12 @@ jobs:
           cache: 'poetry'
 
       - name: Intall dependencies
-        run: poetry install
+        run: |
+          poetry self add poethepoet
+          poetry install
   
       - name: Running tests
-        run: poetry run test
+        run: poetry poe test
           
       - name: Building dist
         run: |
