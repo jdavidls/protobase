@@ -18,14 +18,11 @@ class Watcher(FileSystemEventHandler):
     """
 
     def on_modified(self, event: DirModifiedEvent | FileModifiedEvent):
-        match event:
-            case FileModifiedEvent(src_path=filepath):
-                filepath = Path(filepath)
-                if not any(filepath.is_relative_to(wdir) for wdir in WATCH_DIRS):
-                    return
-                if filepath.suffix not in WATCH_SUFFIXES:
-                    return
-            case _:
+        if isinstance(event, FileModifiedEvent):
+            filepath = Path(event.src_path)
+            if not any(filepath.is_relative_to(wdir) for wdir in WATCH_DIRS):
+                return
+            if filepath.suffix not in WATCH_SUFFIXES:
                 return
 
         run_tests()
