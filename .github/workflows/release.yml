@@ -9,16 +9,19 @@ jobs:
   dist:
     name: Build distribution
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["pypy3.9", "pypy3.10", "3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       
       - name: Install poetry
         run: pipx install poetry
 
-      - name: Set up python
+      - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
           cache: 'poetry'
 
       - name: Intall dependencies
