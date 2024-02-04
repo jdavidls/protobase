@@ -1,4 +1,7 @@
 # Protobase
+
+[![Documentation Status](https://readthedocs.org/projects/protobase/badge/?version=latest)](https://protobase.readthedocs.io/en/latest/?badge=latest)
+
 Protobase is a simple Python library designed to serve as a foundational element in the creation and composition of object classes. 
 
 Protobase makes some default decisions that can be useful in some software projects, automates the implementation of recurring functions in our classes, and provides some interesting functionalities.
