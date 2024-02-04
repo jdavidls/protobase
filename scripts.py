@@ -4,6 +4,7 @@ import subprocess
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent, DirModifiedEvent
+from os import system
 
 
 WATCH_DIRS = [Path("src"), Path("tests")]
@@ -32,18 +33,18 @@ def build_docs():
     """
     Runs the unit tests using the `unittest` module.
     """
-    os.system("clear && printf '\\e[3J'")
+    system("clear && printf '\\e[3J'")
     # subprocess.call("sphinx-apidoc -o docs/source src/protobase".split())
-    subprocess.call("sphinx-build docs dist/docs".split())
+    system("sphinx-build docs dist/docs")
+    system("poetry export --only docs > docs/requirements.txt")
 
 
 def run_tests():
     """
     Runs the unit tests using the `unittest` module.
     """
-    os.system("clear && printf '\\e[3J'")
-
-    subprocess.call("python -m unittest discover -s tests".split())
+    system("clear && printf '\\e[3J'")
+    system("python -m unittest discover -s tests")
 
 
 def run_dev():
