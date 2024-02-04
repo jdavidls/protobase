@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "protobase"
 version = "0.0.0"
-description = "Protobase is a foundational Python library for class creation, enhancing efficiency and reliability, automatic protocol implementation akin to Rust's Traits, and features for immutable object creation."
+description = "Protobase is a simple Python library designed to serve as a foundational element in the creation and composition of object classes."
 authors = ["jdavidls <jdavidls@protonmail.com>"]
 license = "MIT"
 readme = "README.md"
@@ -16,6 +16,7 @@ lark = { extras = ["interegular"], version = "^1.1.9" }
 [tool.poetry.group.docs.dependencies]
 sphinx = "6.2.1"
 renku-sphinx-theme = "^0.4.0"
+sphinx-mdinclude = "^0.5.3"
 
 [tool.poe.tasks.dev]
 help = "Run development environment (watch-mode testing)"

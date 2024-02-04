@@ -65,6 +65,7 @@ def compile_function(
 
     Returns:
         Callable: The compiled function.
+
     Example:
         >>> fn = compile_function(
         ...     "foo",
@@ -74,7 +75,7 @@ def compile_function(
         >>> fn(1, 2)
         3
         >>> fn.__source__
-        'def foo(x: int, y: int) -> int:\n    return x + y\n    \n    \n'
+        def foo(x: int, y: int) -> int:\n    return x + y\n    \n    \n
 
     """
     if locals is None:
