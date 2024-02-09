@@ -15,10 +15,12 @@ def zip(
     self: T, *others: tuple[T], with_names: False
 ) -> Iterator[tuple[Any, *tuple[Any, ...]]]: ...
 
+
 @overload
 def zip(
     self: T, *others: tuple[T], with_names: True
-) -> Iterator[tuple[str, tuple[Any, *tuple[Any, ...]]]]:
+) -> Iterator[tuple[str, tuple[Any, *tuple[Any, ...]]]]: ...
+
 
 def zip(
     self: T, *others: tuple[T], with_names: bool = False
