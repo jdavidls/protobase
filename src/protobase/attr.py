@@ -1,4 +1,4 @@
-from typing import Any, Iterator, TypeVar
+from typing import Any, Iterator, TypeVar, overload
 
 from protobase.core import Obj, fields_of
 
@@ -10,15 +10,35 @@ def names_of(cls: type[Obj]) -> Iterator[str]:
     return fields_of(cls)
 
 
-def zip(self: T, *others: tuple[T]) -> Iterator[tuple[Any, *tuple[Any, ...]]]:
+@overload
+def zip(
+    self: T, *others: tuple[T], with_names: False
+) -> Iterator[tuple[Any, *tuple[Any, ...]]]: ...
+
+@overload
+def zip(
+    self: T, *others: tuple[T], with_names: True
+) -> Iterator[tuple[str, tuple[Any, *tuple[Any, ...]]]]:
+
+def zip(
+    self: T, *others: tuple[T], with_names: bool = False
+) -> Iterator[tuple[Any, *tuple[Any, ...]]]:
     cls = type(self)
 
     if not all(isinstance(other, cls) for other in others):
         invalid_classes = filter(lambda other: not isinstance(other, cls), others)
         raise TypeError(f"Cannot zip {cls} with {invalid_classes}")
 
-    for field in fields_of(cls):
-        yield getattr(self, field), *(getattr(other, field) for other in others)
+    if with_names:
+        for field in fields_of(cls):
+            yield field, (
+                getattr(self, field),
+                *(getattr(other, field) for other in others),
+            )
+    else:
+
+        for field in fields_of(cls):
+            yield getattr(self, field), *(getattr(other, field) for other in others)
 
 
 def lookup(cls: type, nm: str):
