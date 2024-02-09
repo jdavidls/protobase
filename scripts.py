@@ -1,11 +1,9 @@
-import os
-from pathlib import Path
-import subprocess
 import time
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileModifiedEvent, DirModifiedEvent
 from os import system
+from pathlib import Path
 
+from watchdog.events import DirModifiedEvent, FileModifiedEvent, FileSystemEventHandler
+from watchdog.observers import Observer
 
 WATCH_DIRS = [Path("src"), Path("tests")]
 WATCH_SUFFIXES = [
@@ -26,7 +24,7 @@ class Watcher(FileSystemEventHandler):
             if filepath.suffix not in WATCH_SUFFIXES:
                 return
 
-        run_tests()
+            run_tests()
 
 
 def build_docs():

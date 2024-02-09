@@ -159,7 +159,7 @@ def fields_of(cls: type[Obj]) -> MappingProxyType[str, Any]:
         {
             nm: tp
             for nm, tp in cls.__dict__["__attr_cache__"].items()
-            if not nm.startswith("_")
+            if not nm.startswith("__")
         }
     )
 
