@@ -162,27 +162,27 @@ class ConsedTest(unittest.TestCase):
         self.assertIsNot(a, c)
 
 
-class ZipTest(unittest.TestCase):
-    class Foo(Obj, traits.Zip, traits.Init):
-        a: int
-        b: float
-        c: str
+# class ZipTest(unittest.TestCase):
+#     class Foo(Obj, traits.Zip, traits.Init):
+#         a: int
+#         b: float
+#         c: str
 
-    def test_zip(self):
-        a = self.Foo(a=1, b=2.0, c="3")
-        b = self.Foo(a=9, b=8.0, c="7")
+#     def test_zip(self):
+#         a = self.Foo(a=1, b=2.0, c="3")
+#         b = self.Foo(a=9, b=8.0, c="7")
 
-        self.assertEqual(
-            list(a.zip(b)),
-            [
-                ("a", (1, 9)),
-                ("b", (2.0, 8.0)),
-                ("c", ("3", "7")),
-            ],
-        )
+#         self.assertEqual(
+#             list(a.zip(b)),
+#             [
+#                 ("a", (1, 9)),
+#                 ("b", (2.0, 8.0)),
+#                 ("c", ("3", "7")),
+#             ],
+#         )
 
-    def test_zip_raise(self):
-        a = self.Foo(a=1, b=2.0, c="3")
+#     def test_zip_raise(self):
+#         a = self.Foo(a=1, b=2.0, c="3")
 
-        with self.assertRaises(TypeError):
-            list(a.zip(1))
+#         with self.assertRaises(TypeError):
+#             list(a.zip(1))

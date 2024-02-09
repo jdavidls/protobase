@@ -26,7 +26,7 @@ class Watcher(FileSystemEventHandler):
             if filepath.suffix not in WATCH_SUFFIXES:
                 return
 
-        run_tests()
+            run_tests()
 
 
 def build_docs():

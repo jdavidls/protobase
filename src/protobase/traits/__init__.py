@@ -7,7 +7,4 @@ from .cmp import *
 from .inmutable import *
 from .consed import *
 
-from .zip import *
-
-
-Common = (Zip, Cmp, Eq, Hash, Repr, Init)
+Common = (Cmp, Eq, Hash, Repr, Init)
