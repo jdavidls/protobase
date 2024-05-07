@@ -1,6 +1,7 @@
 from typing import Any
-from protobase.core import Trait, Obj, fields_of, impl, protomethod
-from protobase.utils import compile_function, attr_lookup
+from protobase import attr
+from protobase.core import Trait, Object, fields_of, trait_method
+from protobase.utils import compile_function
 
 
 class Init(Trait):
@@ -20,41 +21,38 @@ class Init(Trait):
         2
     """
 
-    @protomethod()
-    def __init__(self, **kwargs): ...
+    @trait_method
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError()
 
-    @protomethod()
+    @trait_method
     def __getstate__(self) -> dict[str, Any]: ...
 
     def __setstate__(self, state: dict[str, Any]) -> None:
         self.__init__(**state)
 
 
-@impl(Init.__init__)
-def _impl_setstate(cls: type[Obj]):
+@Init.__init__.implementer
+def _impl_init(cls: type[Object]):
     fields = fields_of(cls)
 
     return compile_function(
-        "__init__",
         f'def __init__(self, *, {", ".join(fields)}):',
         *[f"    global {field}_setter" for field in fields],
         *[f"    {field}_setter(self, {field})" for field in fields],
-        globals={
-            f"{field}_setter": attr_lookup(cls, field).__set__ for field in fields
-        },
+        globals={f"{field}_setter": attr.setter(cls, field) for field in fields},
         __kwdefaults__=cls.__kwdefaults__,
         # __defaults__=cls.__defaults__,
     )
 
 
-@impl(Init.__getstate__)
-def _impl_getstate(cls: type[Obj]):
+@Init.__getstate__.implementer
+def _impl_getstate(cls: type[Object]):
     fields = fields_of(cls)
 
     params = ", ".join(f"{field}=self.{field}" for field in fields)
 
     return compile_function(
-        "__getstate__",
         "def __getstate__(self):",
         f"    return dict({params})",
     )

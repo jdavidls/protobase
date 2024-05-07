@@ -1,5 +1,5 @@
 from typing import Iterator
-from protobase.core import Trait, fields_of, impl, protomethod
+from protobase.core import Trait, fields_of, trait_method
 
 
 class Repr(Trait):
@@ -15,14 +15,14 @@ class Repr(Trait):
         Foo(a=1, b=2)
     """
 
-    @protomethod()
+    @trait_method
     def __rich_repr__(self) -> Iterator[tuple]: ...
 
-    @protomethod()
+    @trait_method
     def __repr__(self) -> str: ...
 
 
-@impl(Repr.__repr__)
+@Repr.__repr__.implementer
 def _impl_repr(cls: type[Repr]):
     def __repr__(self):
         attrs = filter(_rich_attr_filter, self.__rich_repr__())
@@ -32,7 +32,7 @@ def _impl_repr(cls: type[Repr]):
     return __repr__
 
 
-@impl(Repr.__rich_repr__)
+@Repr.__rich_repr__.implementer
 def _impl_rich_repr(cls: type[Repr]):
     fields = fields_of(cls)
     defaults = cls.__kwdefaults__

@@ -18,9 +18,9 @@ sphinx = "6.2.1"
 renku-sphinx-theme = "^0.4.0"
 sphinx-mdinclude = "^0.5.3"
 
-[tool.poe.tasks.dev]
+[tool.poe.tasks.watch]
 help = "Run development environment (watch-mode testing)"
-script = "scripts:run_dev"
+script = "scripts:run_watch"
 
 [tool.poe.tasks.test]
 help = "Run tests"

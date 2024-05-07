@@ -4,7 +4,7 @@ from typing import TypeVar
 import unittest
 import pickle
 
-from protobase import Obj, traits
+from protobase import Object, traits
 from protobase.traits.consed import consed_count
 
 
@@ -16,7 +16,7 @@ def clone(obj: T) -> T:
 
 
 class PickleTest(unittest.TestCase):
-    class Root(Obj, traits.Cmp, traits.Repr, traits.Init):
+    class Root(Object, traits.Cmp, traits.Repr, traits.Init):
         alphas: list[PickleTest.Alpha]
         betas: list[PickleTest.Beta]
 
@@ -29,7 +29,7 @@ class PickleTest(unittest.TestCase):
                 betas=betas,
             )
 
-    class Alpha(Obj, traits.Cmp, traits.Repr, traits.Consed):
+    class Alpha(Object, traits.Cmp, traits.Repr, traits.Consed):
         a: int
         b: int
 
@@ -40,7 +40,7 @@ class PickleTest(unittest.TestCase):
                 b=10 - n,
             )
 
-    class Beta(Obj, traits.Cmp, traits.Repr, traits.Init):
+    class Beta(Object, traits.Cmp, traits.Repr, traits.Init):
         n: int
         alpha: PickleTest.Alpha
 

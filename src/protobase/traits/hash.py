@@ -1,5 +1,6 @@
-from protobase.core import Obj, Trait, fields_of, impl, protomethod
-from protobase.utils import attr_lookup, compile_function, slots_of
+from protobase import attr
+from protobase.core import Object, Trait, fields_of, trait_method
+from protobase.utils import compile_function, slots_of
 
 
 class Hash(Trait):
@@ -12,7 +13,7 @@ class Hash(Trait):
     hashed.
 
     Example:
-        >>> class Foo(Base, Hash):
+        >>> class Foo(Object, Hash):
         ...     a: int
         ...     b: int
         ...     c: int
@@ -21,27 +22,30 @@ class Hash(Trait):
         3713081631934410656
     """
 
-    @protomethod()
+    @trait_method
     def __hash__(self): ...
 
 
-@impl(Hash.__hash__)
-def _hash_impl(cls: type[Obj]):
-    fields = fields_of(cls)
+@Hash.__hash__.implementer
+def _hash_impl(cls: type[Object]):
+    # fields = fields_of(cls)
+
+    self_fields = (f"self.{field}," for field in fields_of(cls))
+    hash_of_self_fields = f'hash(({" ".join(self_fields)}))'
 
     if "__hash_cache__" in slots_of(cls):
         return compile_function(
-            "__hash__",
-            f"def __hash__(self):",
-            f'    if hasattr(self, "__hash_cache__"):',
-            f"        return self.__hash_cache__",
-            f'    hash_cache_setter(self, hash(({" ".join(f"self.{field}," for field in fields)})))',
-            f"    return self.__hash_cache__",
-            globals={"hash_cache_setter": attr_lookup(cls, "__hash_cache__").__set__},
+            "def __hash__(self):",
+            '    if hasattr(self, "__hash_cache__"):',
+            "        return self.__hash_cache__",
+            f"    hash_cache_setter(self, {hash_of_self_fields})",
+            "    return self.__hash_cache__",
+            globals={
+                "hash_cache_setter": attr.setter(cls, "__hash_cache__"),
+            },
         )
     else:
         return compile_function(
-            "__hash__",
-            f"def __hash__(self):",
-            f'    return hash(({" ".join(f"self.{field}," for field in fields)}))',
+            "def __hash__(self):",
+            f"    return {hash_of_self_fields}",
         )

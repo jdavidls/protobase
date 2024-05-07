@@ -1,6 +1,6 @@
 from types import NotImplementedType
 from typing import Literal, Self, Sequence
-from protobase.core import Trait, fields_of, impl, protomethod
+from protobase.core import Trait, fields_of, trait_method
 from protobase.utils import compile_function
 
 
@@ -31,19 +31,18 @@ class Eq(Trait):
         False
     """
 
-    @protomethod()
+    @trait_method
     def __eq__(self, other: Self) -> bool: ...
 
-    @protomethod()
+    @trait_method
     def __ne__(self, other: Self) -> bool: ...
 
 
-@impl(Eq.__eq__)
+@Eq.__eq__.implementer
 def _impl_eq(cls: type[Eq]):
     fields = fields_of(cls)
 
     return compile_function(
-        "__eq__",
         "def __eq__(self, other):",
         "    if self is other: return True",
         "    if type(self) != type(other): return NotImplemented",
@@ -51,12 +50,11 @@ def _impl_eq(cls: type[Eq]):
     )
 
 
-@impl(Eq.__ne__)
+@Eq.__ne__.implementer
 def _impl_ne(cls: type[Eq]):
     fields = fields_of(cls)
 
     return compile_function(
-        "__ne__",
         "def __ne__(self, other):",
         "    if self is other: return False",
         "    if type(self) != type(other): return NotImplemented",
@@ -65,10 +63,10 @@ def _impl_ne(cls: type[Eq]):
 
 
 class Cmp(Eq):
-    @protomethod()
+    @trait_method
     def __lt__(self, other: Self) -> NotImplementedType | bool: ...
 
-    @protomethod()
+    @trait_method
     def __gt__(self, other: Self) -> NotImplementedType | bool: ...
 
     def __le__(self, other: Self) -> NotImplementedType | bool:
@@ -87,7 +85,6 @@ def _compile_cmp_function(
 ):
     fields = list(fields)
     return compile_function(
-        ct_name,
         f"def {ct_name}(self, other):",
         "    if type(self) != type(other): return NotImplemented",
         # "    if self is other: return False",
@@ -99,11 +96,11 @@ def _compile_cmp_function(
     )
 
 
-@impl(Cmp.__lt__)
+@Cmp.__lt__.implementer
 def _impl_lt(cls: type[Cmp]):
     return _compile_cmp_function("__lt__", "__ge__", fields_of(cls))
 
 
-@impl(Cmp.__gt__)
+@Cmp.__gt__.implementer
 def _impl_gt(cls: type[Cmp]):
     return _compile_cmp_function("__gt__", "__le__", fields_of(cls))

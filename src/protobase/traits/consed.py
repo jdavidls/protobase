@@ -1,6 +1,6 @@
 from weakref import WeakKeyDictionary, ref
 
-from protobase.core import Obj, Trait, fields_of
+from protobase.core import Object, Trait
 
 from .cmp import Eq
 from .hash import Hash
@@ -9,7 +9,7 @@ from .inmutable import Inmutable
 from .weak import Weak
 
 
-class Consed(Eq, Hash, Inmutable, Init, Weak, Trait):
+class Consed(Hash, Eq, Inmutable, Init, Weak, Trait):
     """
     Trait for a class that is a hash-consed object.
     Conses objects are objects that are unique for each set of field values.
@@ -31,15 +31,15 @@ class Consed(Eq, Hash, Inmutable, Init, Weak, Trait):
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
-        if issubclass(cls, Obj):
+        if issubclass(cls, Object):
             cls.__consing__ = WeakKeyDictionary()
 
     def __new__(cls, *args, **kwargs):
-        obj = super().__new__(cls, *args, **kwargs)
-        if obj in cls.__consing__:
-            return cls.__consing__[obj]()
-        cls.__consing__[obj] = ref(obj)
-        return obj
+        self = super().__new__(cls, *args, **kwargs)
+        if self in cls.__consing__:
+            return cls.__consing__[self]()
+        cls.__consing__[self] = ref(self)
+        return self
 
 
 def consed_count(cls: type[Consed]) -> int:

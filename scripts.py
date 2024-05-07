@@ -47,7 +47,7 @@ def run_tests():
     system("python -m unittest discover -s tests")
 
 
-def run_dev():
+def run_watch():
     """
     Run the unit tests when a file changes.
     """

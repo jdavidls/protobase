@@ -1,4 +1,6 @@
 from itertools import chain
+
+import re
 from typing import Any, Callable, Sequence
 
 
@@ -24,30 +26,10 @@ def mro_of_bases(bases: Sequence[type]):
     return _mro_merge([_mro(base) for base in bases])
 
 
-def attr_lookup(cls: type, nm: str):
-    """
-    Look up a attribute by name in the class hierarchy without
-    triggering the __getattribute__ mechanism.
-
-    Args:
-        cls (type): The class to search in.
-        nm (str): The name of the descriptor to look up.
-
-    Returns:
-        object: The descriptor object.
-
-    Raises:
-        AttributeError: If the descriptor cannot be found in the class hierarchy.
-
-    """
-    for base in cls.__mro__:
-        if nm in base.__dict__:
-            return base.__dict__[nm]
-    raise AttributeError(f"Cannot find '{nm}' in '{cls.__qualname__}'")
+FN_NAME_RE = re.compile("^def\s(\w+)")
 
 
 def compile_function(
-    name: str,
     *source,
     locals: dict[str, Any] | None = None,
     globals: dict[str, Any] | None = None,
@@ -68,7 +50,6 @@ def compile_function(
 
     Example:
         >>> fn = compile_function(
-        ...     "foo",
         ...     "def foo(x: int, y: int) -> int:",
         ...     "    return x + y",
         ... )
@@ -82,8 +63,14 @@ def compile_function(
         locals = {}
 
     source = "\n".join(source)
+
+    try:
+        fn_name = FN_NAME_RE.match(source).group(1)
+    except:
+        raise ValueError("Cannot find function name in source code.")
+
     exec(source, globals, locals)
-    fn = locals[name]
+    fn = locals[fn_name]
     fn.__source__ = source
     for nm, val in kwargs.items():
         setattr(fn, nm, val)

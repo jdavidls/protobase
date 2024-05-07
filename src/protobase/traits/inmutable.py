@@ -96,7 +96,7 @@ class Inmutable(Init, Trait):
 
     def __init_subclass__(cls) -> None:
         return super().__init_subclass__()
-        cls.__dict__["__setattr__"] = Inmutable.__setattr__
+        # cls.__dict__["__setattr__"] = Inmutable.__setattr__
 
     @classmethod
     def __check_type_hints__(cls):
@@ -125,13 +125,17 @@ class Inmutable(Init, Trait):
 
     __slots__ = ("__hash_cache__",)
 
+    @classmethod
+    def __class_call__(cls, *args, **kwargs):
+        return cls.__new__(cls, *args, **kwargs)
+
     def __new__(cls, *args, **kwargs):
-        obj = super().__new__(cls, *args, **kwargs)
-        super(Inmutable, obj).__init__(*args, **kwargs)
-        return obj
+        self = super(Inmutable, cls).__new__(cls, *args, **kwargs)
+        super(Inmutable, self).__init__(*args, **kwargs)
+        return self
 
     def __init__(self, *args, **kwargs):
-        pass
+        raise NotImplementedError("Init cannot be called on Inmutable classes")
 
     def __getnewargs_ex__(self) -> tuple[tuple, dict]:
         return (), {nm: getattr(self, nm) for nm in fields_of(type(self))}

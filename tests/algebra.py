@@ -5,7 +5,7 @@ from pathlib import Path
 
 import lark
 
-from protobase import Obj, traits
+from protobase import Object, traits
 from protobase.core import fields_of
 
 
@@ -18,7 +18,7 @@ class AST(*traits.Common):
         return lambda _, children: cls(**dict(zip(fields, children)), **kwargs)
 
 
-class Add(Obj, AST):
+class Add(Object, AST):
     l: Node
     r: Node
 
@@ -26,7 +26,7 @@ class Add(Obj, AST):
         return f"{self.l} + {self.r}"
 
 
-class Sub(Obj, AST):
+class Sub(Object, AST):
     l: Node
     r: Node
 
@@ -34,7 +34,7 @@ class Sub(Obj, AST):
         return f"{self.l} - {self.r}"
 
 
-class Mul(Obj, AST):
+class Mul(Object, AST):
     l: Node
     r: Node
 
@@ -44,7 +44,7 @@ class Mul(Obj, AST):
         return f"{l} * {r}"
 
 
-class Div(Obj, AST):
+class Div(Object, AST):
     l: Node
     r: Node
 
@@ -54,7 +54,7 @@ class Div(Obj, AST):
         return f"{l} / {r}"
 
 
-class Neg(Obj, AST):
+class Neg(Object, AST):
     r: Node
 
     def __str__(self):

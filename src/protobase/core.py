@@ -1,7 +1,9 @@
 # %%
 from __future__ import annotations
 
+from functools import cached_property
 from itertools import chain
+from threading import RLock
 from types import (
     GetSetDescriptorType,
     MappingProxyType,
@@ -13,17 +15,19 @@ from typing import (
     Callable,
     Generic,
     NamedTuple,
+    Optional,
     ParamSpec,
     TypeVar,
     dataclass_transform,
     get_type_hints,
 )
 
+
 from protobase.utils import mro_of_bases
 
 
 @dataclass_transform()
-class Meta(type):
+class ObjectMeta(type):
     """
     Metaclass for protobase classes.
 
@@ -53,7 +57,7 @@ class Meta(type):
         for base in reversed(bases):
             if base is object or base is Generic:
                 continue
-            if not isinstance(base, Meta):
+            if not isinstance(base, ObjectMeta):
                 raise TypeError(
                     f"Invalid base class: '{base.__qualname__}'."
                     f" All base classes must be 'proto.Base' classes."
@@ -70,20 +74,41 @@ class Meta(type):
 
         # if "__slots__" in namespace:
         #     raise TypeError("You cannot define '__slots__' in a ProtoBase class.")
-        slots = namespace.get("__slots__", ())
-        slots = slots + tuple(field for field in fields if field not in base_slots)
+        user_defined_slots = namespace.get("__slots__", ())
+        field_slots = tuple(field for field in fields if field not in base_slots)
 
-        namespace["__slots__"] = tuple(slots)
+        for nm, attr in namespace.items():
+            if isinstance(attr, cached_property):
+                from protobase.attr import slot_cached
+
+                namespace[nm] = slot_cached(attr.func)
+
+        # cached_property_slots = tuple(
+        #     attr.__set_name__(None, nm)
+        #     for nm, attr in namespace.items()
+        #     if isinstance(attr, cached_slot)
+        # )
+
         namespace["__kwdefaults__"] = kwdefaults
+        namespace["__slots__"] = (
+            *user_defined_slots,
+            *field_slots,
+            # *cached_property_slots,
+        )
 
         return type.__new__(mcs, name, tuple(bases), namespace)
 
-    # def __call__(cls, *args, **kwargs):
-    #     return cls.__new__(cls, *args, **kwargs)
+    def __call__(cls, *args, **kwargs):
+        return cls.__class_call__(*args, **kwargs)
+
+    def __class_call__(cls, *args, **kwargs):
+        self = cls.__new__(cls, *args, **kwargs)
+        self.__init__(*args, **kwargs)
+        return self
 
 
 @dataclass_transform()
-class Trait(metaclass=Meta):  # TODO: Quitar trait de la metaclase
+class Trait(metaclass=ObjectMeta):  # TODO: Quitar trait de la metaclase
     """
     Base class for all traits.
     Traits are classes whose instances are meant to be used as
@@ -95,7 +120,7 @@ class Trait(metaclass=Meta):  # TODO: Quitar trait de la metaclase
         pass
 
     def __new__(cls, *args, **kwargs):
-        if not issubclass(cls, Obj):
+        if is_trait(cls):
             raise TypeError(
                 f"Cannot instantiate a bare trait class '{cls.__qualname__}'"
             )
@@ -104,36 +129,39 @@ class Trait(metaclass=Meta):  # TODO: Quitar trait de la metaclase
 
 
 @dataclass_transform()
-class Obj(Trait, metaclass=Meta):
+class Object(Trait, metaclass=ObjectMeta):
     """
     Base class for all protobase classes.
     """
 
-    def __init_subclass__(cls) -> None:
-        super().__init_subclass__()
+    # def __init_subclass__(cls) -> None:
+    #     super().__init_subclass__()
 
-        # Pop front on the mro  the class descriptors for slots, protomethods
-        for base in cls.__bases__:
-            if not issubclass(base, Trait):
-                continue
+    #     # Pop front on the mro  the class descriptors for slots, protomethods
+    #     for base in cls.__mro__:
+    #         if not issubclass(base, Trait):
+    #             continue
 
-            # for nm in base.__slots__:
-            #     if not nm in cls.__dict__:
-            #         setattr(cls, nm, base.__dict__[nm])
+    #         # for nm in base.__slots__:
+    #         #     if not nm in cls.__dict__:
+    #         #         setattr(cls, nm, base.__dict__[nm])
 
-            for nm, item in base.__dict__.items():
-                if nm in cls.__dict__:
-                    continue
+    #         for nm, item in base.__dict__.items():
+    #             if not isinstance(
+    #                 item, (trait_method, MemberDescriptorType, GetSetDescriptorType)
+    #             ):
+    #                 continue
 
-                if isinstance(
-                    item, (protomethod, MemberDescriptorType, GetSetDescriptorType)
-                ):
-                    # cls.__dict__[nm] = item
-                    setattr(cls, nm, item)
+    #             if nm in cls.__dict__:
+    #                 continue
+
+    #             # cls.__dict__[nm] = item
+    #             setattr(cls, nm, item)
 
 
-def is_trait(cls: type[Obj]) -> bool:
-    return issubclass(cls, Trait) and not issubclass(cls, Obj)
+#
+def is_trait(cls: type[Object]) -> bool:
+    return issubclass(cls, Trait) and not issubclass(cls, Object)
 
 
 class AttrInfo(NamedTuple):
@@ -143,12 +171,12 @@ class AttrInfo(NamedTuple):
     annotations: dict[str, Any]
 
 
-def fields_of(cls: type[Obj]) -> MappingProxyType[str, Any]:
+def fields_of(cls: type[Object]) -> MappingProxyType[str, Any]:
     """
     Get the fields of a protobase class or object.
 
     """
-    assert issubclass(cls, Obj)
+    assert issubclass(cls, Object)
 
     if "__attr_cache__" not in cls.__dict__:
         hints = get_type_hints(cls)
@@ -159,7 +187,7 @@ def fields_of(cls: type[Obj]) -> MappingProxyType[str, Any]:
         {
             nm: tp
             for nm, tp in cls.__dict__["__attr_cache__"].items()
-            if not nm.startswith("_")
+            # if not nm.startswith("_")
         }
     )
 
@@ -168,15 +196,18 @@ Args = ParamSpec("Args")
 RType = TypeVar("RType")
 
 
-class protomethod(Generic[Args, RType]):
+class proto_method: ...
+
+
+class trait_method(Generic[Args, RType]):
     """
 
     Example:
     >>> class MyTrait(proto.Trait):
-    ...     @proto.method
+    ...     @trait_method
     ...     def my_meth(self, x: int) -> str:
     ...         ...
-    >>> @MyTrait.my_meth.impl()
+    >>> @MyTrait.my_meth.implementer()
     ... async def _my_meth_impl(cls: type[MyTrait]):
     ...     fields = attrs(cls).keys()
     ...     return compile_function(
@@ -194,31 +225,33 @@ class protomethod(Generic[Args, RType]):
 
     """
 
-    __slots__ = (
-        "_proto_fn",
-        "_impl_fn",
-        "_owner",
-    )
-    _proto_fn: Callable
-    _impl_fn: Callable
-    _owner: type[Obj]
+    _trait_fn: Callable
+    _implementer: Callable
+    _implementations: dict[type[Object], Callable]
 
-    def __init__(self, proto_fn: Callable[Args, RType] = None) -> None:
-        if proto_fn is not None:
-            self(proto_fn)
+    def __init__(self, trait_fn: Callable[Args, RType] = None) -> None:
+        self._trait_fn = trait_fn
+        self._implementer = None
+        self._implementations = {}
 
-    def __call__(self, proto_fn: Callable[Args, RType]):
-        self._proto_fn = proto_fn
-        return self
+    def __repr__(self):
+        return f"<trait_method {self._trait_fn.__name__}>"
+
+    def implementer(
+        self, implementer_fn: Callable[[type[Object]], Callable[Args, RType]]
+    ) -> Callable:
+        assert self._implementer is None, "Cannot reassign the implementation function."
+        self._implementer = implementer_fn
+        return implementer_fn
 
     def __set_name__(self, owner, name):
         if not is_trait(owner):
             raise TypeError(
                 f"Cannot define a protobase method '{name}' in a non-trait only class '{owner.__qualname__}'"
             )
-        if self._proto_fn.__name__ != name:
+        if name != self._trait_fn.__name__:
             raise NameError(
-                f"Cannot define a protobase method '{name}' with a different name than '{self._proto_fn.__name__}'"
+                f"Cannot define a protomethod '{name}' with a different name than '{self._trait_fn.__name__}'"
             )
         # self._owner = owner
 
@@ -226,28 +259,24 @@ class protomethod(Generic[Args, RType]):
         if obj is None:
             return self
 
-        assert issubclass(objtype, Obj)
+        fn = self._implementations.get(objtype, None)
 
-        fn = self._impl_fn(objtype)
-        fn.__name__ = self._proto_fn.__name__
-        fn.__module__ = self._proto_fn.__module__
-        fn.__doc__ = self._proto_fn.__doc__
+        if fn is None:
+            assert not is_trait(objtype)
 
-        setattr(objtype, self._proto_fn.__name__, fn)  # se sobreescribe el descriptor
+            if self._implementer is None:
+                raise TypeError(
+                    f"Cannot find an implementation function for '{self._trait_fn.__name__}'"
+                )
+
+            fn = self._implementer(objtype)
+            fn.__name__ = self._trait_fn.__name__
+            fn.__module__ = self._trait_fn.__module__
+            fn.__doc__ = self._trait_fn.__doc__
+
+            self._implementations[objtype] = fn
 
         return MethodType(fn, obj)
-
-
-def impl(target: protomethod):
-    """
-    Decorator for setting the implementation function of a protobase method.
-    """
-
-    def impl_decorator(impl_fn):
-        target._impl_fn = impl_fn
-        return impl_fn
-
-    return impl_decorator
 
 
 @dataclass_transform()

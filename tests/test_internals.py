@@ -1,10 +1,10 @@
 import unittest
 
-from protobase import Obj, traits
+from protobase import Object, traits
 
 
-class MroDescriptorTest(unittest.TestCase):
-    class A(Obj):
+class TraitMethodTest(unittest.TestCase):
+    class A(Object):
         a: int = 1
 
     class B(A):
@@ -13,12 +13,7 @@ class MroDescriptorTest(unittest.TestCase):
     class C(B):
         c: int = 3
 
-    def test_descriptor_slots(self):
-        self.assertIn("a", self.B.__dict__)
-        self.assertIn("b", self.C.__dict__)
-        self.assertIn("a", self.C.__dict__)
-
-    def test_mro_dispatch(self):
+    def test_trait_method_dispatch(self):
         self.C(a=1, b=2, c=3)
         self.A(a=1)
         self.B(a=1, b=2)

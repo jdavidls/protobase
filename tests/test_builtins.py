@@ -1,11 +1,11 @@
 # %%
 import unittest
 
-from protobase import Obj, traits
+from protobase import Object, traits
 
 
 class InitTest(unittest.TestCase):
-    class A(Obj, traits.Init):
+    class A(Object, traits.Init):
         a: int = 1
 
     class B(A):
@@ -29,7 +29,7 @@ class InitTest(unittest.TestCase):
 
 
 class ReprTest(unittest.TestCase):
-    class ABC(Obj, traits.Repr, traits.Init):
+    class ABC(Object, traits.Repr, traits.Init):
         a: int = 1
         b: float = 2.0
         c: str = "3"
@@ -44,7 +44,7 @@ class ReprTest(unittest.TestCase):
 
 
 class CmpTest(unittest.TestCase):
-    class ABC(Obj, traits.Repr, traits.Cmp, traits.Eq, traits.Init):
+    class ABC(Object, traits.Repr, traits.Cmp, traits.Eq, traits.Init):
         a: int = 1
         b: float = 2.0
         c: str = "3"
@@ -105,7 +105,7 @@ class CmpTest(unittest.TestCase):
 
 
 class HashTest(unittest.TestCase):
-    class ABC(Obj, traits.Hash, traits.Eq, traits.Init):
+    class ABC(Object, traits.Hash, traits.Eq, traits.Init):
         a: int = 1
         b: float = 2.0
         c: str = "3"
@@ -120,18 +120,18 @@ class HashTest(unittest.TestCase):
 
 
 class InmutableTest(unittest.TestCase):
-    class ABC(Obj, traits.Inmutable):
+    class ABC(Object, traits.Inmutable):
         a: int = 1
         b: tuple[frozenset] = frozenset({2.0})
 
     def test_invalid_inmutable(self):
-        class InvalidInmutable(Obj, traits.Inmutable):
+        class InvalidInmutable(Object, traits.Inmutable):
             dct: dict
 
         with self.assertRaises(TypeError):
             InvalidInmutable(dct={})
 
-        class InvalidInmutableNested(Obj, traits.Inmutable):
+        class InvalidInmutableNested(Object, traits.Inmutable):
             dct: tuple[dict]
 
         with self.assertRaises(TypeError):
@@ -147,7 +147,7 @@ class InmutableTest(unittest.TestCase):
 
 
 class ConsedTest(unittest.TestCase):
-    class Foo(Obj, traits.Consed):
+    class Foo(Object, traits.Consed, traits.Hash):
         a: int
         b: float
         c: str
