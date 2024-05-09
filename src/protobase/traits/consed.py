@@ -29,6 +29,8 @@ class Consed(Hash, Eq, Inmutable, Init, Weak, Trait):
         False
     """
 
+    __slots__ = ("__hash_cache__",)
+
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
         if issubclass(cls, Object):

@@ -1,6 +1,7 @@
 from itertools import chain
 
 import re
+from types import ModuleType
 from typing import Any, Callable, Sequence
 
 
@@ -69,11 +70,17 @@ def compile_function(
     except:
         raise ValueError("Cannot find function name in source code.")
 
-    exec(source, globals, locals)
+    try:
+        exec(source, globals, locals)
+    except SyntaxError as e:
+        raise SyntaxError(f"{e.msg} in source code:\n{source}")
+
     fn = locals[fn_name]
     fn.__source__ = source
+
     for nm, val in kwargs.items():
         setattr(fn, nm, val)
+
     return fn
 
 
@@ -110,3 +117,10 @@ def can_import(module: str) -> bool:
         return True
     except ImportError:
         return False
+
+
+def try_import(module: str) -> ModuleType:
+    try:
+        return __import__(module)
+    except ImportError:
+        return None

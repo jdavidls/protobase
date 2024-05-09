@@ -2,8 +2,29 @@ from decimal import Decimal
 from types import GenericAlias
 from typing import NoReturn, get_args, get_origin
 
+from protobase.utils import can_import
+
 from ..core import Trait, fields_of
 from .init import Init
+
+KNOW_INMUTABLE_TYPES: set[type] = {
+    type(None),
+    type(...),
+    type(fields_of),  # function type is accepted as inmutable
+    bool,
+    int,
+    float,
+    bytes,
+    str,
+    tuple,
+    frozenset,
+    Decimal,
+}
+
+if can_import("frozendict"):
+    from frozendict import frozendict
+
+    KNOW_INMUTABLE_TYPES.add(frozendict)
 
 
 def is_inmutable(cls: type) -> bool:
@@ -30,20 +51,6 @@ def is_inmutable(cls: type) -> bool:
         if base in KNOW_INMUTABLE_TYPES:
             return True
     return False
-
-
-KNOW_INMUTABLE_TYPES: set[type] = {
-    type(None),
-    type(...),
-    bool,
-    int,
-    float,
-    bytes,
-    str,
-    tuple,
-    frozenset,
-    Decimal,
-}
 
 
 def know_inmutable(tp: type):

@@ -7,7 +7,7 @@ from .cmp import Eq, Cmp
 from .inmutable import Inmutable, is_inmutable, know_inmutable
 from .consed import Consed, consed_count
 
-Common = (Cmp, Hash, Eq, Repr, Init)
+Common = (Hash, Eq, Repr, Init)
 
 
-class Basic(Cmp, Hash, Eq, Repr, Init): ...
+class Basic(Hash, Eq, Repr, Init): ...

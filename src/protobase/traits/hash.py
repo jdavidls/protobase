@@ -1,9 +1,10 @@
 from protobase import attr
 from protobase.core import Object, Trait, fields_of, trait_method
+from protobase.traits.cmp import Eq
 from protobase.utils import compile_function, slots_of
 
 
-class Hash(Trait):
+class Hash(Trait, Eq):
     """Trait that implements the __hash__ function in a class.
 
     This implementation of __hash__ hashes all the field values of the object.
@@ -49,3 +50,8 @@ def _hash_impl(cls: type[Object]):
             "def __hash__(self):",
             f"    return {hash_of_self_fields}",
         )
+
+
+def cached_hash_of(obj: Hash) -> int:
+    if hasattr(obj, "__hash_cache__"):
+        return obj.__hash_cache__
