@@ -38,8 +38,12 @@ class Consed(Hash, Eq, Inmutable, Init, Weak, Trait):
 
     def __new__(cls, *args, **kwargs):
         self = super().__new__(cls, *args, **kwargs)
-        if self in cls.__consing__:
-            return cls.__consing__[self]()
+        try:
+            if self in cls.__consing__:
+                return cls.__consing__[self]()
+        except TypeError as exc:
+            raise ValueError(f"Cannot hash-consed mutable object: {self}") from exc
+
         cls.__consing__[self] = ref(self)
         return self
 

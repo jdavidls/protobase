@@ -68,6 +68,8 @@ class ObjectMeta(type):
 
         fields = namespace.get("__annotations__", {}).keys()
 
+        # TODO: filter annotations values starts by ClassVar[ or Annotation[ClassVar[
+
         for field in chain(fields, base_slots):
             if field in namespace:
                 kwdefaults[field] = namespace.pop(field)
