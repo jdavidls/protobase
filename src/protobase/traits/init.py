@@ -43,7 +43,7 @@ def _impl_init(cls: type[Object]):
         )
 
     return compile_function(
-        f"def __init__(self, *, {", ".join(fields)}):",
+        f"def __init__(self, *, {', '.join(fields)}):",
         *[f"    global {field}_setter" for field in fields],
         *[f"    {field}_setter(self, {field})" for field in fields],
         globals={f"{field}_setter": attr.setter(cls, field) for field in fields},

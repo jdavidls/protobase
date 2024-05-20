@@ -27,7 +27,7 @@ def mro_of_bases(bases: Sequence[type]):
     return _mro_merge([_mro(base) for base in bases])
 
 
-FN_NAME_RE = re.compile("^def\s(\w+)")
+FN_NAME_RE = re.compile(r"^def\s(\w+)")
 
 
 def compile_function(
